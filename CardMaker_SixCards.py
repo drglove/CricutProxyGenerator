@@ -88,6 +88,7 @@ class CardGridApp:
             self.background_original = None
 
         self.card_entries = []
+        self.back_page = tk.BooleanVar(value=False)
 
         # --- Header ---
         head = tk.Frame(root)
@@ -112,6 +113,7 @@ class CardGridApp:
         self._make_control(controls, "Contrast", self.contrast_var, 0.0, 2.0, 0.1)
         self._make_control(controls, "Blackpoint", self.blackpoint_var, -50, 50, 1)
         self._make_control(controls, "Warmth", self.warmth_var, -1.0, 1.0, 0.05)
+        tk.Checkbutton(controls, text="Back of page", variable=self.back_page).pack(side="left", padx=4)
 
         # --- Buttons ---
         btns = tk.Frame(root)
@@ -240,8 +242,9 @@ class CardGridApp:
             x1, y1, x2, y2 = slot
             w, h = x2 - x1, y2 - y1
 
-            img = Image.open(path).transpose(method=Image.Transpose.FLIP_LEFT_RIGHT).convert("RGB")
-            #img = Image.open(path).convert("RGB")
+            img = Image.open(path).convert("RGB")
+            if (self.back_page.get()):
+                img = img.transpose(method=Image.Transpose.FLIP_LEFT_RIGHT)
             iw, ih = img.size
 
             slot_is_landscape = w > h
@@ -255,7 +258,8 @@ class CardGridApp:
             img_with_bleed = add_bleed(img_adjusted, BLEED_PX)
 
             bg.paste(img_with_bleed, (x1 - BLEED_PX, y1 - BLEED_PX))
-        bg = bg.transpose(method=Image.Transpose.FLIP_LEFT_RIGHT)
+        if (self.back_page.get()):
+            bg = bg.transpose(method=Image.Transpose.FLIP_LEFT_RIGHT)
         return bg
 
     def generate_output(self):
