@@ -4,7 +4,7 @@ Step 1: Download the program and keep the attached image within the same folder.
 
 Step 2: CD into the folder via CMDPrompt or Powershell
 
-Step 3: python MTG_Cricut_AutoArrange.py
+Step 3: python CardMaker_SixCards.py
 
 
 Step 4: Add your cards and adjust as needed, generate and print your PDF.
