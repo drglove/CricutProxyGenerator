@@ -5,6 +5,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 from PIL import Image, ImageEnhance
 import numpy as np
+import tempfile
 
 # ========= EDIT ME (background path) =========
 BACKGROUND_FILENAME = "CricutTMPL.png"
@@ -19,13 +20,15 @@ def resource_path(relative_path: str) -> str:
 BACKGROUND_PATH = resource_path(BACKGROUND_FILENAME)
 # ============================================
 
+# Authored values at DPI of 300
 portraitX, portraitY = 763, 1058
 landscapeX, landscapeY = 1058, 763
 
 # Grid slots (6 max per page)
+# Authored values at DPI of 300
 slots = [
     (165, 552,  165+landscapeX, 552+landscapeY),       # LeftTop
-    (165, 1412, 165+landscapeX, 1412+landscapeY),     # LeftMid
+    (165, 1412, 165+landscapeX, 1412+landscapeY),      # LeftMid
     (268, 2274,  268+landscapeX, 2274+landscapeY),     # LeftBot
     
     (1224, 262,  1224+landscapeX, 262+landscapeY),     # RightTop
@@ -38,6 +41,12 @@ DPI = 900
 # 0.5 mm bleed
 BLEED_PX = math.ceil(0.5 * DPI / 25.4)
 
+# Correct for DPI authored at fixed 300 DPI scale
+def correct_dpi(value):
+    return int(value * DPI / 300)
+
+portraitX, portraitY = correct_dpi(portraitX), correct_dpi(portraitY)
+slots = [(correct_dpi(x1), correct_dpi(y1), correct_dpi(x2), correct_dpi(y2)) for (x1,y1,x2,y2) in slots]
 
 # --- Helper: add bleed by extending outermost pixels ---
 def add_bleed(img, bleed_px):
@@ -81,7 +90,14 @@ class CardGridApp:
         self.root.title("MTG Card Grid Generator")
 
         try:
-            self.background_original = Image.open(BACKGROUND_PATH).convert("RGB")
+            # Resize the 300 DPI background to match the desired output DPI
+            background_original_unscaled = Image.open(BACKGROUND_PATH)
+            unscaled_dims_x, unscaled_dims_y = background_original_unscaled.size
+            scaled_dims = correct_dpi(unscaled_dims_x), correct_dpi(unscaled_dims_y)
+            background_original_resized = background_original_unscaled.resize(scaled_dims, Image.LANCZOS)
+            with tempfile.NamedTemporaryFile(delete_on_close=False, suffix='cardmaker-bg.png') as temp_file:
+                background_original_resized.save(temp_file.name, resolution=DPI)
+                self.background_original = Image.open(temp_file.name).convert("RGB")
         except Exception as e:
             messagebox.showerror(
                 "Background not found",
