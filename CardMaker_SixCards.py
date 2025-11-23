@@ -33,8 +33,10 @@ slots = [
     (1327, 1983,  1327+landscapeX, 1983+landscapeY)    # RightBot
 ]
 
-# 0.5 mm bleed at 300 DPI ≈ 6 px
-BLEED_PX = 6
+DPI = 900
+
+# 0.5 mm bleed
+BLEED_PX = math.ceil(0.5 * DPI / 25.4)
 
 
 # --- Helper: add bleed by extending outermost pixels ---
@@ -300,7 +302,7 @@ class CardGridApp:
             page_images.append(composed)
 
         page_images[0].save(
-            save_path, save_all=True, append_images=page_images[1:], resolution=300
+            save_path, save_all=True, append_images=page_images[1:], resolution=DPI
         )
 
         messagebox.showinfo("Done", f"Exported {pages}-page PDF successfully!")
