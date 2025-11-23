@@ -240,7 +240,8 @@ class CardGridApp:
             x1, y1, x2, y2 = slot
             w, h = x2 - x1, y2 - y1
 
-            img = Image.open(path).convert("RGB")
+            img = Image.open(path).transpose(method=Image.Transpose.FLIP_LEFT_RIGHT).convert("RGB")
+            #img = Image.open(path).convert("RGB")
             iw, ih = img.size
 
             slot_is_landscape = w > h
@@ -254,6 +255,7 @@ class CardGridApp:
             img_with_bleed = add_bleed(img_adjusted, BLEED_PX)
 
             bg.paste(img_with_bleed, (x1 - BLEED_PX, y1 - BLEED_PX))
+        bg = bg.transpose(method=Image.Transpose.FLIP_LEFT_RIGHT)
         return bg
 
     def generate_output(self):
